@@ -12,7 +12,8 @@ router.use("/client",clientRoute);
 /* router.route('/client').get(adminController.getClientPage);
 router.route('/client').post(adminController.saveClient);
  */
-router.route('/category').get(adminController.getCategoryPage);
+router.use("/category",categoryRoute);
+//router.route('/category').get(adminController.getCategoryPage);
 
 
 
