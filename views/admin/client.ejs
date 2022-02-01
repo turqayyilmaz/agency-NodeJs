@@ -1,0 +1,268 @@
+<%- contentFor("css") %>
+
+<link
+  rel="stylesheet"
+  href="../admin/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="../admin/plugins/datatables-responsive/css/responsive.bootstrap4.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="../admin/plugins/datatables-buttons/css/buttons.bootstrap4.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="../admin/plugins/sweetalert2/sweetalert2.min.css"
+/>
+
+<%- contentFor("body") %>
+<section class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1>Client</h1>
+      </div>
+    </div>
+  </div>
+  <!-- /.container-fluid -->
+</section>
+<section class="content">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Client</h3>
+
+      <div class="card-tools">
+        <button id="addClient" class="btn btn-success">
+          <b>Add Client</b>
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <table
+        id="clientTable"
+        class="display table table-bordered table-striped table-hover dataTable dtr-inline"
+        style="width: 100%"
+      >
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Client Name</th>
+            <th>Client Logo</th>
+            <th>Slug</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">Footer</div>
+    <!-- /.card-footer-->
+  </div>
+</section>
+
+<div class="modal fade" id="clientModal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h4 class="modal-title">Client Add</h4>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="clientForm" name="clientForm" enctype="multipart/form-data">
+          <div class="card-body">
+            <div class="form-group">
+              <label for="clientName">Client Name</label>
+              <input type="text" id="_id" name="_id" />
+              <input
+                type="text"
+                class="form-control"
+                id="clientName"
+                name="clientName"
+                placeholder="Client Name"
+              />
+            </div>
+
+            <div class="form-group">
+              <!-- <label for="customFile">Custom File</label> -->
+              <label for="clientLogo">Logo</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="custom-file-input"
+                  id="clientLogo"
+                  name="clientLogo"
+                  accept="image/*"
+                />
+                <label class="custom-file-label" for="clientLogo"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+          Close
+        </button>
+        <button type="button" id="btnSave" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<script src="../admin/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<script src="../admin/plugins/sweetalert2/sweetalert2.min.js"></script>
+<!--DATATABLE JS-->
+<script src="../admin/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="../admin/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+  $('.custom-file-input').on('change', function () {
+    let fileName = $(this).val().split('\\').pop();
+    $(this).next('.custom-file-label').addClass('selected').html(fileName);
+  });
+
+  var clientTable = $('#clientTable').DataTable({
+    serverSide: true,
+    ajax: 'client/getClientsJson',
+    columnDefs: [
+      {
+        name: '_id',
+        data: '_id',
+        targets: [0],
+        visible: true,
+        searchable: false,
+      },
+      {
+        name: 'clientName',
+        data: 'clientName',
+        targets: [1],
+        visible: true,
+        searchable: true,
+      },
+      {
+        name: 'clientLogo',
+        data: 'clientLogo',
+        targets: [2],
+        visible: true,
+        searchable: true,
+      },
+      {
+        name: 'slug',
+        data: 'slug',
+        targets: [3],
+        visible: true,
+        searchable: true,
+      },
+      {
+        name: 'actions',
+        data: 'actions',
+        targets: [4],
+        visible: true,
+        searchable: false,
+      },
+    ],
+  });
+
+  $('#addClient').click(() => {
+    $('#clientModal').modal();
+  });
+
+  $('#btnSave').click(() => {
+    var data = new FormData($('#clientForm')[0]);
+    $.ajax({
+      type: 'POST',
+      enctype: 'multipart/form-data',
+      url: '/admin/client',
+      data: data,
+      processData: false,
+      contentType: false,
+      cache: false,
+      success: function (data) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Succesfull',
+          text: 'Succesfully added!',
+          footer: '',
+        });
+        $('#clientName').val('');
+        $('#_id').val('');
+        $('#clientLogo').val('').change();
+        $('#clientModal').modal('toggle');
+        clientTable.ajax.reload();
+      },
+      error: function (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: err.statusText + '!',
+          footer: '',
+        });
+      },
+    });
+  });
+
+  $('#clientModal').on('hidden.bs.modal', function () {
+    $(this).find('form').trigger('reset');
+  });
+
+  function clientEdit(id) {
+    let client;
+    $.ajax({
+      type: 'GET',
+
+      url: 'client/getClient/' + id,
+      success: function (data) {
+        client = data;
+        $('#_id').val(client._id);
+        $('#clientName').val(client.clientName);
+        $('#clientModal').modal('show');
+      },
+      error: function (err) {
+        console.log(err);
+      },
+    });
+  }
+
+  function clientDelete(id) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          type: 'DELETE',
+
+          url: 'client/deleteClient/' + id,
+          success: function (data) {
+            if (data.status == 'success') {
+              Swal.fire('Deleted!', 'Client has been deleted.', 'success');
+              clientTable.ajax.reload();
+            } else Swal.fire('Not Deleted!', 'An error occurred', 'error');
+          },
+          error: function (err) {
+            console.log(err);
+          },
+        });
+      }
+    });
+  }
+</script>
