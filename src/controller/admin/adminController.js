@@ -17,9 +17,5 @@ exports.getPortfolioPage = async (req, res) => {
 };
 
 
-exports.getCategoryPage = async (req, res) => {
-  res.locals.pageName = 'Category';
-  res.locals.pageTitle = 'Category';
-  res.render('admin/category');
-};
+
 
