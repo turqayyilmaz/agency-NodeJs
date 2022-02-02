@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const slugify = require('slugify-mongoose');
-const mongoosePaginate = require('mongoose-paginate-v2');
+
 const dataTable = require('mongoose-datatables');
 
 const ClientSchema = new Schema(
@@ -16,7 +16,6 @@ const ClientSchema = new Schema(
   },
   { timestamps: {} }
 );
-//ClientSchema.plugin(mongoosePaginate);
 ClientSchema.plugin(slugify);
 ClientSchema.plugin(dataTable);
 
