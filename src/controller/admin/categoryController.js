@@ -3,7 +3,7 @@ exports.getCategoryPage = async (req, res) => {
   res.locals.pageName = 'category';
   res.locals.pageTitle = 'Category';
   res.render('admin/category');
-};
+}; 
 exports.saveCategory = async (req, res) => {
   //res.status(400).json({ status: 'error', body:req.body });
   if (req.body._id) {
@@ -74,3 +74,8 @@ exports.getcategory = async (req, res) => {
   const category = await Category.findById(req.params._id);
   res.json(category);
 };
+
+exports.getAllCategories = async (req,res)=>{
+  const categories = await Category.find({},"_id categoryName").sort('categoryName');
+  res.json(categories);
+}

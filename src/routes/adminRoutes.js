@@ -5,15 +5,13 @@ const loginController = require('../controller/admin/loginController');
 const adminController = require('../controller/admin/adminController');
 const clientRoute = require('../routes/clientRoute');
 const categoryRoute = require('../routes/categoryRoute');
+const portfolioRoute = require('../routes/portfolioRoute');
 
 router.route('/').get(adminController.getDashboardPage);
-router.route('/portfolio').get(adminController.getPortfolioPage);
 
 router.use('/client', clientRoute);
-/* router.route('/client').get(adminController.getClientPage);
-router.route('/client').post(adminController.saveClient);
- */
 router.use('/category', categoryRoute);
+router.use('/portfolio', portfolioRoute);
 //router.route('/category').get(adminController.getCategoryPage);
 
 module.exports = router;

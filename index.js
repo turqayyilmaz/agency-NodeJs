@@ -10,7 +10,9 @@ const ejs = require('ejs');
 const MongoStore = require('connect-mongo');
 const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
-var cors = require('cors');
+const cors = require('cors');
+const frontEndController = require('./src/controller/frontEndController');
+var path = require('path');
 
 const adminRoutes = require('./src/routes/adminRoutes');
 const authMiddleware = require('./src/middlewares/authmiddleware');
@@ -35,6 +37,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(flash());
 app.use(express.static('public'));
+app.use(
+  '/adminlte',
+  express.static(path.join(__dirname, '/node_modules/admin-lte/'))
+);
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout extractScripts', true);
@@ -58,9 +64,7 @@ let locals = {
   page_name: 'index',
 };
 
-app.get('/', (req, res) => {
-  res.render('index', { layout: false });
-});
+app.get('/', frontEndController.getIndexPage);
 app.get('/login', (req, res) => {
   res.locals.pagename = 'login';
   res.locals.pageTitle = 'Giriş Yap';
@@ -79,13 +83,14 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 //CONNECT DB
-mongoose.connect(dbUrl,{
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  
-}).then(() => {
-  console.log('DB Connected Successfully');
-});
+mongoose
+  .connect(dbUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('DB Connected Successfully');
+  });
 
 app.listen(port, () => console.info(`Agency App listening on port ${port}`));
 

@@ -7,8 +7,7 @@ router.route('/').post(categoryController.saveCategory);
 router.route('/getCategoriesJson').get(categoryController.getCategoriesJson);
 router.route('/getCategory/:_id').get(categoryController.getcategory);
 router.route('/deleteCategory/:_id').delete(categoryController.deletecategory);
-router.get('/get',(req,res)=>{
+router.route('/getAllCategories').get(categoryController.getAllCategories);
 
-res.send(req.params)
-});
+
 module.exports = router;
