@@ -25,7 +25,9 @@
             <img class="img-fluid" src="<%=p.image  %>" alt="..." />
           </a>
           <div class="portfolio-caption">
+           
             <div class="portfolio-caption-heading">
+              <%=p.projectName%><br />
               <%=p.client.clientName%>
             </div>
             <div class="portfolio-caption-subheading text-muted">
@@ -62,7 +64,7 @@
               <!-- Project details-->
               <h2 class="text-uppercase"><%=p.projectName %></h2>
               <p class="item-intro text-muted">
-                <%=p.shortDescription %>
+                <%-p.shortDescription %>
                           </p>
               <img
                 class="img-fluid d-block mx-auto"
@@ -70,7 +72,7 @@
                 alt="..."
               />
               <p>
-                <%=p.description %>
+                <%-p.description %>
               </p>
               <ul class="list-inline">
                 <li>

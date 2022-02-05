@@ -7,8 +7,6 @@ router.route('/').get(portfolioController.getPortfolioPage);
 router.route('/').post(portfolioController.savePortfolio);
 router.route('/getportfoliosJson').get(portfolioController.getPortfoliosJson);
 router.route('/getportfolio/:_id').get(portfolioController.getPortfolio);
-router
-  .route('/deleteportfolio/:_id')
-  .delete(portfolioController.deletePortfolio);
-router.route('/getAllPortfolios').get(portfolioController.getAllPPortfolios);
+router.route('/deleteportfolio/:_id').delete(portfolioController.deletePortfolio);
+
 module.exports = router;

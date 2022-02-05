@@ -15,7 +15,13 @@ const CategorySchema = new Schema(
   { timestamps: {} }
 );
 
-CategorySchema.plugin(slugify);
+CategorySchema.pre('validate', function (next) {
+  this.slug = slugify(this.categoryName, {
+    lower: true,
+    strict: true,
+  });
+  next();
+});
 CategorySchema.plugin(dataTable);
 
 const Category = mongoose.model('Category', CategorySchema);

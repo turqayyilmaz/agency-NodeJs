@@ -34,8 +34,8 @@
     "mongoose": "^6.1.7",
     "mongoose-datatables": "^3.2.0",
     "mongoose-paginate-v2": "^1.5.0",
-    "slugify": "^1.6.5",
-    "slugify-mongoose": "^1.0.2"
+    "slugify": "^1.6.5"
+    
   },
   "devDependencies": {
     "nodemon": "^2.0.15",

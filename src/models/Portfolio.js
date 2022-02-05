@@ -13,26 +13,24 @@ const PortfolioSchema = new Schema(
       unique: true,
       required: true,
     },
-    shorDescription: String,
+    shortDescription: String,
     description: String,
     client: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'Client',
     },
     image: String,
-    
+
     category: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: 'Category',
     },
     slug: { type: String, unique: true, slug: 'projectName' },
   },
-  
 
   { timestamps: {} }
 );
-PortfolioSchema.plugin(mongoosePaginate);
-PortfolioSchema.plugin(dataTable);
+
 PortfolioSchema.pre('validate', function (next) {
   this.slug = slugify(this.projectName, {
     lower: true,
@@ -40,5 +38,8 @@ PortfolioSchema.pre('validate', function (next) {
   });
   next();
 });
-const Porfolio = mongoose.model('Portfolio', PortfolioSchema);
-module.exports = Porfolio;
+PortfolioSchema.plugin(mongoosePaginate);
+PortfolioSchema.plugin(dataTable);
+
+const Portfolio = mongoose.model('portfolio', PortfolioSchema);
+module.exports = Portfolio;

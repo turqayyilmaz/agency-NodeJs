@@ -1,8 +1,10 @@
 const dataTables = require('mongoose-datatables');
 const Client = require('../../models/Client');
+const utils = require('./utils');
+
 const { dirname, resolve } = require('path');
 const { reject } = require('lodash');
-  
+
 const appDir = dirname(require.main.filename);
 const uploadedUrl = '/uploads/clients';
 
@@ -18,82 +20,34 @@ exports.getClient = async (req, res) => {
 };
 
 exports.deleteClient = async (req, res) => {
-
-  
   let id = req.params._id;
-   Client.findOneAndRemove({_id:id},(err,doc)=>{
-    console.log("doc",doc);
-    if(err){
-      console.log(error);
-      res.status(400).json({status:"error",error:err});
-    }
-    else{
-      res.status(200).json({status:"success",client:doc});
-      
+  Client.findOneAndRemove({ _id: id }, (err, client) => {
+    if (err) {
+      res.status(400).json({ status: 'error', err });
+    } else {
+      res.status(200).json({ status: 'success', client });
     }
   });
 };
 
 exports.saveClient = async (req, res) => {
-  let logoCheck = new Promise((resolve, reject) => {
-    if (req.files) {
-      const uploadImage = req.files.clientLogo;
-      const imagePath =
-        appDir + '\\public\\uploads\\clients\\' + uploadImage.name;
-      const imageUrl = uploadedUrl + '\\' + uploadImage.name;
-
-      uploadImage.mv(imagePath.toString(), async (err) => {
-        if (err) {
-          console.log('image Path: ', imagePath);
-          console.log(err);
-          reject('');
-        } else {
-          resolve(imageUrl);
-        }
-      });
+  let client = req.body._id
+    ? await Client.findById(req.body._id)
+    : new Client();
+  let logo = await utils.uploadImage(req, 'clientLogo', 'clients');
+  client.clientName = req.body.clientName;
+  if (logo != '') client.clientLogo = logo;
+  client.save((err, client) => {
+    if (err) {
+      res.status(400).json({ status: 'error' });
     } else {
-      reject('');
+      res.status(200).json({ status: 'success', client: client });
     }
   });
-
-  if (req.body._id) {
-    let client = await Client.findById(req.body._id);
-    let logo ="";
-    await logoCheck.then((val)=>{
-      logo=val;
-    });
-    client.clientName = req.body.clientName;
-    console.log('logo: ', logo, ' client: ', client);
-    if (logo != '') client.clientLogo = logo;
-    client.save((err, client) => {
-      if (err) {
-        res.status(400).json({ status: 'error' });
-      } else {
-        res.status(200).json({ status: 'success',client:client });
-      }
-    });
-  } else {
-    let client = new Client();
-    client.clientName = req.body.clientName;
-    let logo = "";
-    await logoCheck.then((val)=>{
-      logo=val;
-    });
-    console.log('logo: ', logo, ' client: ', client);
-    if (logo != '') client.clientLogo = logo;
-    await Client.create(client, (err, client) => {
-      if (err) {
-        console.log(err);
-        res.status(400).json({ status: 'error' });
-      } else {
-        res.status(200).json({ status: 'success' });
-      }
-    });
-  }
 };
 
-exports.getAllClients = async (req,res)=>{
-  const clients = await Client.find({},"_id clientName").sort('clientName');
+exports.getAllClients = async (req, res) => {
+  const clients = await Client.find({}, '_id clientName').sort('clientName');
   res.json(clients);
 };
 

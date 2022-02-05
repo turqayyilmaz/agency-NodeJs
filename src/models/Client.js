@@ -16,7 +16,15 @@ const ClientSchema = new Schema(
   },
   { timestamps: {} }
 );
-ClientSchema.plugin(slugify);
+
+ClientSchema.pre('validate', function (next) {
+  this.slug = slugify(this.clientName, {
+    lower: true,
+    strict: true,
+  });
+  next();
+});
+
 ClientSchema.plugin(dataTable);
 
 const Client = mongoose.model('Client', ClientSchema);
