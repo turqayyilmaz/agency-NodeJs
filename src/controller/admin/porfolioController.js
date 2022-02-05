@@ -1,10 +1,6 @@
 const Portfolio = require('../../models/Portfolio');
-const { dirname, resolve } = require('path');
-const { reject } = require('lodash');
 const Porfolio = require('../../models/Portfolio');
-
-const appDir = dirname(require.main.filename);
-const uploadedUrl = '/uploads/portfolios';
+const utils = require('../admin/utils');
 
 exports.getPortfolioPage = (req, res) => {
   res.locals.pageName = 'portfolio';
@@ -14,74 +10,25 @@ exports.getPortfolioPage = (req, res) => {
 };
 
 exports.savePortfolio = async (req, res) => {
-  console.log('files:', req.files);
-  console.log('body: ', req.body);
+  let portfolio = req.body._id
+    ? await Portfolio.findById(req.body._id)
+    : new Porfolio();
 
-  let imageCheck = new Promise((resolve, reject) => {
-    if (req.files) {
-      const uploadImage = req.files.image;
-      const imagePath =
-        appDir + '\\public\\uploads\\portfolios\\' + uploadImage.name;
-      const imageUrl = uploadedUrl + '\\' + uploadImage.name;
+  let image = await utils.uploadImage(req, 'image', 'portfolios');
 
-      uploadImage.mv(imagePath.toString(), async (err) => {
-        if (err) {
-          console.log('image Path: ', imagePath);
-          console.log(err);
-          reject('');
-        } else {
-          resolve(imageUrl);
-        }
-      });
+  portfolio.projectName = req.body.projectName;
+  portfolio.shortDescription = req.body.shortDescription;
+  portfolio.description = req.body.description;
+  portfolio.category = req.body.category;
+  portfolio.client = req.body.client;
+  if (image != '') portfolio.image = image;
+  await portfolio.save((err, portfolio) => {
+    if (err) {
+      res.status(400).json({ status: 'error', portfolio });
     } else {
-      reject('');
+      res.status(200).json({ status: 'success', portfolio });
     }
   });
-
-  if (req.body._id) {
-    let portfolio = await Portfolio.findById(req.body._id);
-    let image ="";
-    
-    await imageCheck.then((value)=>{
-      this.image=value;
-    });
-    portfolio.projectName = req.body.projectName; 
-    portfolio.shortDescription = req.body.shortDescription;
-    portfolio.description = req.body.description;
-    portfolio.category = req.body.category;
-    portfolio.client = req.body.client;
-
-    console.log('image: ', image, ' portfolio: ', portfolio);
-    
-    portfolio.save((err, client) => {
-      if (err) {
-        res.status(400).json({ status: 'error' });
-      } else {
-        res.status(200).json({ status: 'success' });
-      }
-    });
-  } else {
-    let portfolio = new Portfolio();
-    portfolio.projectName = req.body.projectName; //ejs de projectname olarak degistir
-    portfolio.shortDescription = req.body.shortDescription;
-    portfolio.description = req.body.description;
-    portfolio.category = req.body.category;
-    portfolio.client = req.body.client;
-    let image = "";
-    await imageCheck.then((val)=>{
-      image=val;
-    });
-    console.log('logo: ', image, ' portfolio: ', portfolio);
-    if (image != '') portfolio.image = image;
-    await Portfolio.create(portfolio, (err, por) => {
-      if (err) {
-        console.log(err);
-        res.status(400).json({ status: 'error' });
-      } else {
-        res.status(200).json({ status: 'success', portfolio: por });
-      }
-    });
-  }
 };
 exports.getPortfoliosJson = (req, res) => {
   Portfolio.dataTables({
@@ -89,8 +36,6 @@ exports.getPortfoliosJson = (req, res) => {
     limit: req.query.length,
 
     formatter: function (portfolio) {
-      portfolio.populate("category");
-      console.log(portfolio);
       return {
         _id: portfolio._id,
         projectName: portfolio.projectName,
@@ -102,14 +47,14 @@ exports.getPortfoliosJson = (req, res) => {
       };
     },
     skip: req.query.start,
-    /* search: {
+    search: {
       value: req.query.search.value,
-      fields: ['projectName', 'clientLogo', 'slug'],
-    }, */
+      fields: ['projectName', 'client.clientName', 'category.categoryName'],
+    },
     sort: {
       clientName: 1,
     },
-    populate:["category","client"],
+    populate: ['category', 'client'],
   }).then(function (table) {
     res.json({
       data: table.data,
@@ -124,17 +69,13 @@ exports.getPortfolio = async (req, res) => {
 };
 exports.deletePortfolio = (req, res) => {
   let id = req.params._id;
-  Portfolio.findOneAndRemove({_id:id},(err,doc)=>{
-   console.log("doc",doc);
-   if(err){
-     console.log(error);
-     res.status(400).json({status:"error",error:err});
-   }
-   else{
-     res.status(200).json({status:"success",portfolio:doc}); 
-   }
- });
-};
-exports.getAllPPortfolios = (req, res) => {
-  res.send('getAllPortfolios');
+  Portfolio.findOneAndRemove({ _id: id }, (err, doc) => {
+    console.log('doc', doc);
+    if (err) {
+      console.log(error);
+      res.status(400).json({ status: 'error', error: err });
+    } else {
+      res.status(200).json({ status: 'success', portfolio: doc });
+    }
+  });
 };
